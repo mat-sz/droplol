@@ -1,13 +1,14 @@
 #!/usr/bin/env node
+import { readFileSync } from 'fs';
+import { basename } from 'path';
+import { v4 as uuid } from 'uuid';
+import { TypeSocket } from 'typesocket';
+import { fromBuffer } from 'file-type';
 import * as wrtc from 'wrtc';
 import WebSocket from 'ws';
-import { TypeSocket } from 'typesocket';
-import { readFileSync } from 'fs';
 import cliProgress from 'cli-progress';
 import colors from 'colors';
 import commandLineArgs from 'command-line-args';
-import { fromBuffer } from 'file-type';
-import { basename } from 'path';
 
 import { MessageModel, WelcomeMessageModel, NameMessageModel, PingMessageModel, NetworkMessageModel, RTCDescriptionMessageModel, RTCCandidateMessageModel, TransferMessageModel, ActionMessageModel } from './types/Models';
 import { MessageType, ActionMessageActionType } from './types/MessageType';
@@ -49,7 +50,7 @@ let fileName = basename(FILE);
 let clientId: string;
 let connection: RTCPeerConnection;
 let rtcConfiguration: RTCConfiguration;
-let transferId = 'droplol-cli';
+let transferId = uuid();
 let transferInProgress = false;
 const bar = new cliProgress.SingleBar({
     format: '[Transfer] Progress: |' + colors.cyan('{bar}') + '| {percentage}% || Speed: {speed}',
