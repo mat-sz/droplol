@@ -12,6 +12,8 @@ export async function receiveFile(transferMessage: TransferMessageModel, socket:
         format: '[Transfer] Progress: |' + colors.cyan('{bar}') + '| {percentage}% || Speed: {speed}',
     }, cliProgress.Presets.rect);
 
+    console.log('[Transfer] Incoming transfer: ' + transferMessage.fileName + ' (' + transferMessage.fileType + ', ' + (transferMessage.fileSize / 1024) + ' kB');
+
     const connection = new RTCPeerConnection(rtcConfiguration);
     connections[transferMessage.transferId] = connection;
 
@@ -67,7 +69,7 @@ export async function receiveFile(transferMessage: TransferMessageModel, socket:
             offset += event.data.byteLength;
 
             bar.update(offset, {
-                speed: Math.round(offset/(new Date().getTime() / 1000 - timestamp) / 1000) + ' kB/s'
+                speed: Math.round(offset/(new Date().getTime() / 1000 - timestamp) / 1024) + ' kB/s'
             });
 
             if (offset >= transferMessage.fileSize) {

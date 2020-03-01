@@ -86,7 +86,7 @@ export async function sendFile(transferId: string, clientId: string, fileBuffer:
 
             offset += buffer.byteLength;
             bar.update(offset, {
-                speed: Math.round(offset/(new Date().getTime() / 1000 - timestamp) / 1000) + ' kB/s'
+                speed: Math.round(offset/(new Date().getTime() / 1000 - timestamp) / 1024) + ' kB/s'
             });
 
             if (offset >= fileBuffer.byteLength) {
