@@ -5,12 +5,11 @@ import { TypeSocket } from 'typesocket';
 import { MessageModel, RTCDescriptionMessageModel, RTCCandidateMessageModel, ActionMessageModel } from './types/Models';
 import { MessageType } from './types/MessageType';
 
-export function sendFile(transferId: string, clientId: string, fileBuffer: ArrayBuffer, socket: TypeSocket<MessageModel>, rtcConfiguration: RTCConfiguration, connections: { [k: string]: RTCPeerConnection }, cancellationMessages: ActionMessageModel[]) {
+export async function sendFile(transferId: string, clientId: string, fileBuffer: ArrayBuffer, socket: TypeSocket<MessageModel>, rtcConfiguration: RTCConfiguration, connections: { [k: string]: RTCPeerConnection }, cancellationMessages: ActionMessageModel[]) {
     const bar = new cliProgress.SingleBar({
         format: '[Transfer] Progress: |' + colors.cyan('{bar}') + '| {percentage}% || Speed: {speed}',
     }, cliProgress.Presets.rect);
 
-    
     const connection = new RTCPeerConnection(rtcConfiguration);
     connections[transferId] = connection;
 

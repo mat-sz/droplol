@@ -1,6 +1,6 @@
 # droplol
 
-[drop.lol](https://drop.lol) CLI client. Currently only sending files is possible.
+[drop.lol](https://drop.lol) CLI client.
 
 See: [filedrop-web](https://github.com/mat-sz/filedrop-web) and [filedrop-ws](https://github.com/mat-sz/filedrop-ws) for more information regarding this project.
 
@@ -8,14 +8,19 @@ See: [filedrop-web](https://github.com/mat-sz/filedrop-web) and [filedrop-ws](ht
 
 ```sh
 npx droplol ./file.txt
+# or, if you only want to receive files:
+npx droplol
 ```
 
 ## Usage
 
 ```
-Usage: npx droplol file [-n network]
+Usage: npx droplol [file] [-n network]
   --help, -h     prints help
   --network, -n  sets network name
+When file is provided, the file is sent and then the program exists.
+When no file is provided, the program will receive all files and save
+them in the current directory.
 ```
 
 When installed globally (`npm install -g droplol`) the command is available as `drop`.
