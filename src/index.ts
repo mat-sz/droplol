@@ -45,19 +45,24 @@ global['WebSocket'] = WebSocket;
 // @ts-ignore Polyfill node's lack of RTCPeerConnection to simplify code sharing between front end and this.
 global['RTCPeerConnection'] = wrtc.RTCPeerConnection;
 
+// Upload
 let fileBuffer: ArrayBuffer = new Uint8Array(readFileSync(FILE)).buffer;
 let fileName = basename(FILE);
-let clientId: string;
-let connection: RTCPeerConnection;
-let rtcConfiguration: RTCConfiguration;
-let transferId = uuid();
+let validTransferIds = [uuid()];
+let clientsContacted: string[] = [];
 let transferInProgress = false;
+
+let clientId: string;
+let connections: { [k: string]: RTCPeerConnection } = {};
+let rtcConfiguration: RTCConfiguration;
+
 const bar = new cliProgress.SingleBar({
     format: '[Transfer] Progress: |' + colors.cyan('{bar}') + '| {percentage}% || Speed: {speed}',
 }, cliProgress.Presets.rect);
 
-function sendFile(clientId: string) {
-    connection = new RTCPeerConnection(rtcConfiguration);
+function sendFile(transferId: string, clientId: string) {
+    const connection = new RTCPeerConnection(rtcConfiguration);
+    connections[transferId] = connection;
 
     connection.addEventListener('negotiationneeded', async () => {
         const offer = await connection.createOffer();
@@ -192,17 +197,24 @@ socket.on('message', async (msg) => {
             const networkMessage = msg as NetworkMessageModel;
             console.log('[Connection] Available clients: ' + (networkMessage.clients.length - 1));
             if (networkMessage.clients.length > 1) {
-                const client = networkMessage.clients.find((client) => client.clientId !== clientId);
-                if (client && !transferInProgress) {
-                    transferInProgress = true;
-                    socket.send({
-                        type: 'transfer',
-                        transferId: transferId,
-                        targetId: client.clientId,
-                        fileName: fileName,
-                        fileSize: fileBuffer.byteLength,
-                        fileType: (await fromBuffer(fileBuffer))?.mime || 'application/octet-stream',
-                    } as TransferMessageModel)
+                const clients = networkMessage.clients.filter((client) => client.clientId !== clientId);
+                if (!transferInProgress) {
+                    clients.forEach(async (client) => {
+                        if (clientsContacted.includes(client.clientId)) return;
+
+                        clientsContacted.push(client.clientId);
+                        const transferId = uuid();
+                        validTransferIds.push(transferId);
+                        
+                        socket.send({
+                            type: 'transfer',
+                            transferId: transferId,
+                            targetId: client.clientId,
+                            fileName: fileName,
+                            fileSize: fileBuffer.byteLength,
+                            fileType: (await fromBuffer(fileBuffer))?.mime || 'application/octet-stream',
+                        } as TransferMessageModel);
+                    })
                 }
             } else {
                 console.log('[Connection] No clients available, open: ' + DROP_ADDRESS + networkName);
@@ -213,18 +225,30 @@ socket.on('message', async (msg) => {
             break;
         case MessageType.ACTION:
             const actionMessage: ActionMessageModel = msg as ActionMessageModel;
-            if (actionMessage.action === ActionMessageActionType.ACCEPT) {
-                sendFile(actionMessage.clientId as string);
+            switch (actionMessage.action) {
+                case ActionMessageActionType.ACCEPT:
+                    if (validTransferIds.includes(actionMessage.transferId)) {
+                        transferInProgress = true;
+                        sendFile(actionMessage.transferId, actionMessage.clientId as string);
+                    }
+                    break;
+                case ActionMessageActionType.REJECT:
+                    validTransferIds = validTransferIds.filter((transferId) => transferId !== actionMessage.transferId);
+                    break;
             }
             break;
         case MessageType.RTC_DESCRIPTION:
             const rtcMessage: RTCDescriptionMessageModel = msg as RTCDescriptionMessageModel;
-            connection.setRemoteDescription(rtcMessage.data);
+            if (rtcMessage.transferId in connections) {
+                connections[rtcMessage.transferId].setRemoteDescription(rtcMessage.data);
+            }
             break;
         case MessageType.RTC_CANDIDATE:
             const rtcCandidate: RTCCandidateMessageModel = msg as RTCCandidateMessageModel;
             try {
-                connection.addIceCandidate(rtcCandidate.data);
+                if (rtcCandidate.transferId in connections) {
+                    connections[rtcCandidate.transferId].addIceCandidate(rtcCandidate.data);
+                }
             } catch {}
             break;
         case MessageType.PING:
