@@ -51,6 +51,7 @@ let fileName = basename(FILE);
 let validTransferIds = [uuid()];
 let clientsContacted: string[] = [];
 let transferInProgress = false;
+let cancellationMessages: ActionMessageModel[] = [];
 
 let clientId: string;
 let connections: { [k: string]: RTCPeerConnection } = {};
@@ -63,6 +64,12 @@ const bar = new cliProgress.SingleBar({
 function sendFile(transferId: string, clientId: string) {
     const connection = new RTCPeerConnection(rtcConfiguration);
     connections[transferId] = connection;
+
+    for (let message of cancellationMessages) {
+        if (message.transferId !== transferId) {
+            socket.send(message);
+        }
+    }
 
     connection.addEventListener('negotiationneeded', async () => {
         const offer = await connection.createOffer();
@@ -214,6 +221,13 @@ socket.on('message', async (msg) => {
                             fileSize: fileBuffer.byteLength,
                             fileType: (await fromBuffer(fileBuffer))?.mime || 'application/octet-stream',
                         } as TransferMessageModel);
+
+                        cancellationMessages.push({
+                            type: MessageType.ACTION,
+                            transferId: transferId,
+                            targetId: client.clientId,
+                            action: ActionMessageActionType.CANCEL,
+                        });
                     })
                 }
             } else {
