@@ -1,0 +1,56 @@
+{
+  "name": "droplol",
+  "version": "1.0.0",
+  "description": "drop.lol CLI client for easy peer-to-peer file transfers.",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "keywords": [
+    "file",
+    "transfer",
+    "peer-to-peer",
+    "p2p",
+    "cli",
+    "typescript"
+  ],
+  "bin": {
+    "drop": "./lib/index.js"
+  },
+  "scripts": {
+    "start": "ts-node-dev --respawn --transpileOnly src/index.ts",
+    "prepare": "npm run build",
+    "test": "jest",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mat-sz/droplol.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mat-sz/droplol/issues"
+  },
+  "homepage": "https://github.com/mat-sz/droplol",
+  "author": "mat-sz <contact@matsz.dev>",
+  "license": "BSD-3-Clause-Clear",
+  "devDependencies": {
+    "@types/cli-progress": "^3.4.2",
+    "@types/command-line-args": "^5.0.0",
+    "@types/jest": "^25.1.3",
+    "@types/node": "^13.7.4",
+    "@types/ws": "^7.2.2",
+    "canvas": "^2.6.1",
+    "jest": "^25.1.0",
+    "ts-jest": "^25.2.1",
+    "ts-node": "^8.6.2",
+    "ts-node-dev": "^1.0.0-pre.44",
+    "typescript": "^3.7.5",
+    "webrtc": "^1.14.1"
+  },
+  "dependencies": {
+    "cli-progress": "^3.6.0",
+    "command-line-args": "^5.1.1",
+    "file-type": "^14.1.3",
+    "typesocket": "^1.0.0",
+    "wrtc": "^0.4.4",
+    "ws": "^7.2.1"
+  }
+}
