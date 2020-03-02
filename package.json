@@ -1,6 +1,6 @@
 {
   "name": "droplol",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "drop.lol CLI client for easy peer-to-peer file transfers.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
