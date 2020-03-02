@@ -2,6 +2,10 @@
 
 [drop.lol](https://drop.lol) CLI client.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/mat-sz/droplol/master/droplol.gif" alt="Screenshot">
+</p>
+
 See: [filedrop-web](https://github.com/mat-sz/filedrop-web) and [filedrop-ws](https://github.com/mat-sz/filedrop-ws) for more information regarding this project.
 
 **Quickstart:**
