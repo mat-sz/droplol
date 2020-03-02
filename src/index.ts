@@ -95,8 +95,8 @@ socket.on('message', async (msg) => {
             break;
         case MessageType.NETWORK:
             const networkMessage = msg as NetworkMessageModel;
-            console.log('[Connection] Available clients: ' + (networkMessage.clients.length - 1));
             if (networkMessage.clients.length > 1 && fileName && fileBuffer) {
+                console.log('[Connection] Connected clients: ' + (networkMessage.clients.length - 1));
                 const clients = networkMessage.clients.filter((client) => client.clientId !== clientId);
                 if (!transferInProgress) {
                     clients.forEach(async (client) => {
