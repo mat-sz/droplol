@@ -19,7 +19,9 @@ const DROP_WS_SERVER = process.env.DROP_WS_SERVER || 'wss://drop.lol/ws/';
 const DROP_ADDRESS = process.env.DROP_ADDRESS || 'https://drop.lol/';
 
 console.log(colors.magenta(colors.bold('drop.lol CLI | GH: https://github.com/mat-sz/droplol')));
-console.log(colors.bold('By using this tool you agree to the terms of service: ' + DROP_ADDRESS + 'tos'));
+console.log(colors.bold('By using droplol you agree to the Terms of Service:'));
+console.log(colors.bold(DROP_ADDRESS + 'tos'));
+console.log('');
 
 const optionDefinitions = [
     { name: 'file', type: String, defaultOption: true },
@@ -59,7 +61,7 @@ if (options.file) {
     fileBuffer = new Uint8Array(readFileSync(options.file)).buffer;
     fileName = basename(options.file);
 } else {
-    console.log('[Connection] No file selected, receive mode is enabled.');
+    console.log('No file selected, receive mode is enabled.');
     receiveMode = true;
 }
 
@@ -77,7 +79,7 @@ const socket = new TypeSocket<MessageModel>(DROP_WS_SERVER, {
 });
 
 socket.on('connected', () => {
-    console.log('[Connection] Connected to server: ' + DROP_WS_SERVER);
+    console.log('Connected to server: ' + DROP_WS_SERVER);
 });
 
 socket.on('message', async (msg) => {
@@ -92,11 +94,16 @@ socket.on('message', async (msg) => {
                 type: 'name',
                 networkName: networkName
             } as NameMessageModel);
+
+            if (receiveMode) {
+                console.log('Send files via: ' + DROP_ADDRESS + networkName);
+                console.log('or use the following network name: ' + networkName);
+            }
             break;
         case MessageType.NETWORK:
             const networkMessage = msg as NetworkMessageModel;
             if (networkMessage.clients.length > 1 && fileName && fileBuffer) {
-                console.log('[Connection] Connected clients: ' + (networkMessage.clients.length - 1));
+                console.log('Connected clients: ' + (networkMessage.clients.length - 1));
                 const clients = networkMessage.clients.filter((client) => client.clientId !== clientId);
                 if (!transferInProgress) {
                     clients.forEach(async (client) => {
@@ -124,13 +131,13 @@ socket.on('message', async (msg) => {
                     })
                 }
             } else if (networkMessage.clients.length <= 1) {
-                console.log('[Connection] No clients available, open: ' + DROP_ADDRESS + networkName);
+                console.log('No clients available, open: ' + DROP_ADDRESS + networkName);
             }
             break;
         case MessageType.TRANSFER:
             const transferMessage: TransferMessageModel = msg as TransferMessageModel;
             if (!receiveMode) {
-                console.log('[Connection] Transfer request received but application is running in send mode.');
+                console.log('Transfer request received but application is running in send mode.');
                 socket.send({
                     type: MessageType.ACTION,
                     targetId: transferMessage.clientId as string,
