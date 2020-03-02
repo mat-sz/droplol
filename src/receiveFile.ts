@@ -12,7 +12,7 @@ export async function receiveFile(transferMessage: TransferMessageModel, socket:
         format: '[Transfer] Progress: |' + colors.cyan('{bar}') + '| {percentage}% || Speed: {speed}',
     }, cliProgress.Presets.rect);
 
-    console.log('[Transfer] Incoming transfer: ' + transferMessage.fileName + ' (' + transferMessage.fileType + ', ' + (transferMessage.fileSize / 1024) + ' kB');
+    console.log('[Transfer] Incoming transfer: ' + transferMessage.fileName + ' (' + transferMessage.fileType + ', ' + Math.round(transferMessage.fileSize / 1024) + ' kB');
 
     const connection = new RTCPeerConnection(rtcConfiguration);
     connections[transferMessage.transferId] = connection;
