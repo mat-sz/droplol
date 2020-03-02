@@ -14,7 +14,12 @@ import { MessageType, ActionMessageActionType } from './types/MessageType';
 import { sendFile } from './sendFile';
 import { receiveFile } from './receiveFile';
 
+const nameCharacterSet = 'CEFGHJKMNPQRTVWXY';
+const DROP_WS_SERVER = process.env.DROP_WS_SERVER || 'wss://drop.lol/ws/';
+const DROP_ADDRESS = process.env.DROP_ADDRESS || 'https://drop.lol/';
+
 console.log(colors.magenta(colors.bold('drop.lol CLI | GH: https://github.com/mat-sz/droplol')));
+console.log(colors.bold('By using this tool you agree to the terms of service: ' + DROP_ADDRESS + 'tos'));
 
 const optionDefinitions = [
     { name: 'file', type: String, defaultOption: true },
@@ -33,9 +38,6 @@ if (options.help) {
     process.exit(0);
 }
 
-const nameCharacterSet = 'CEFGHJKMNPQRTVWXY';
-const DROP_WS_SERVER = process.env.DROP_WS_SERVER || 'wss://drop.lol/ws/';
-const DROP_ADDRESS = process.env.DROP_ADDRESS || 'https://drop.lol/';
 let networkName = '';
 let receiveMode = false;
 
