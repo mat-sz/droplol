@@ -4,110 +4,141 @@ import { TypeSocket } from 'typesocket';
 import { writeFileSync } from 'fs';
 import { basename } from 'path';
 
-import { MessageModel, RTCDescriptionMessageModel, RTCCandidateMessageModel, TransferMessageModel } from './types/Models';
+import {
+  MessageModel,
+  RTCDescriptionMessageModel,
+  RTCCandidateMessageModel,
+  TransferMessageModel,
+} from './types/Models';
 import { MessageType } from './types/MessageType';
 
-export async function receiveFile(transferMessage: TransferMessageModel, socket: TypeSocket<MessageModel>, rtcConfiguration: RTCConfiguration, connections: { [k: string]: RTCPeerConnection }, rtcMessage: RTCDescriptionMessageModel) {
-    const bar = new cliProgress.SingleBar({
-        format: '[Transfer] Progress: |' + colors.cyan('{bar}') + '| {percentage}% || Speed: {speed}',
-    }, cliProgress.Presets.rect);
+export async function receiveFile(
+  transferMessage: TransferMessageModel,
+  socket: TypeSocket<MessageModel>,
+  rtcConfiguration: RTCConfiguration,
+  connections: { [k: string]: RTCPeerConnection },
+  rtcMessage: RTCDescriptionMessageModel
+) {
+  const bar = new cliProgress.SingleBar(
+    {
+      format:
+        '[Transfer] Progress: |' +
+        colors.cyan('{bar}') +
+        '| {percentage}% || Speed: {speed}',
+    },
+    cliProgress.Presets.rect
+  );
 
-    console.log('[Transfer] Incoming transfer: ' + transferMessage.fileName + ' (' + transferMessage.fileType + ', ' + Math.round(transferMessage.fileSize / 1024) + ' kB');
+  console.log(
+    '[Transfer] Incoming transfer: ' +
+      transferMessage.fileName +
+      ' (' +
+      transferMessage.fileType +
+      ', ' +
+      Math.round(transferMessage.fileSize / 1024) +
+      ' kB'
+  );
 
-    const connection = new RTCPeerConnection(rtcConfiguration);
-    connections[transferMessage.transferId] = connection;
+  const connection = new RTCPeerConnection(rtcConfiguration);
+  connections[transferMessage.transferId] = connection;
 
-    connection.addEventListener('icecandidate', (e) => {
-        if (!e || !e.candidate) return;
+  connection.addEventListener('icecandidate', e => {
+    if (!e || !e.candidate) return;
 
-        const candidateMessage: RTCCandidateMessageModel = {
-            type: MessageType.RTC_CANDIDATE,
-            targetId: transferMessage.clientId as string,
-            transferId: transferMessage.transferId,
-            data: e.candidate,
-        };
-        
-        socket.send(candidateMessage);
-    });
-
-    const timestamp = new Date().getTime() / 1000;
-    let buffer: Uint8Array = new Uint8Array(0);
-    let offset = 0;
-
-    let complete = false;
-    const onFailure = () => {
-        complete = true;
-        console.log('[Transfer] Transfer failed.');
+    const candidateMessage: RTCCandidateMessageModel = {
+      type: MessageType.RTC_CANDIDATE,
+      targetId: transferMessage.clientId as string,
+      transferId: transferMessage.transferId,
+      data: e.candidate,
     };
 
-    const onComplete = () => {
-        complete = true;
+    socket.send(candidateMessage);
+  });
 
-        bar.stop();
-        console.log('[Transfer] Complete.');
-        writeFileSync(basename(transferMessage.fileName), buffer);
+  const timestamp = new Date().getTime() / 1000;
+  let buffer: Uint8Array = new Uint8Array(0);
+  let offset = 0;
 
-        connection.close();
-    };
+  let complete = false;
+  const onFailure = () => {
+    complete = true;
+    console.log('[Transfer] Transfer failed.');
+  };
 
-    connection.addEventListener('datachannel', (event) => {
-        console.log('[Transfer] Connected.');
-        bar.start(transferMessage.fileSize, 0, {
-            speed: 'N/A'
-        });
+  const onComplete = () => {
+    complete = true;
 
-        const channel = event.channel;
+    bar.stop();
+    console.log('[Transfer] Complete.');
+    writeFileSync(basename(transferMessage.fileName), buffer);
 
-        channel.binaryType = 'arraybuffer';
-        channel.addEventListener('message', (event) => {
-            const array = new Uint8Array(event.data);
-            const tempBuffer = new Uint8Array(buffer.length + array.length);
-            tempBuffer.set(buffer, 0);
-            tempBuffer.set(array, buffer.length);
-            buffer = tempBuffer;
+    connection.close();
+  };
 
-            offset += event.data.byteLength;
-
-            bar.update(offset, {
-                speed: Math.round(offset/(new Date().getTime() / 1000 - timestamp) / 1024) + ' kB/s'
-            });
-
-            if (offset >= transferMessage.fileSize) {
-                onComplete();
-                channel.close();
-            }
-        });
-
-        channel.addEventListener('close', () => {
-            if (offset < transferMessage.fileSize) {
-                onFailure();
-            } else if (!complete) {
-                onComplete();
-            }
-        });
+  connection.addEventListener('datachannel', event => {
+    console.log('[Transfer] Connected.');
+    bar.start(transferMessage.fileSize, 0, {
+      speed: 'N/A',
     });
 
-    connection.addEventListener('iceconnectionstatechange', () => {
-        if ((connection.iceConnectionState === 'failed' ||
-            connection.iceConnectionState === 'disconnected') && !complete) {
-            onFailure();
-        }
+    const channel = event.channel;
+
+    channel.binaryType = 'arraybuffer';
+    channel.addEventListener('message', event => {
+      const array = new Uint8Array(event.data);
+      const tempBuffer = new Uint8Array(buffer.length + array.length);
+      tempBuffer.set(buffer, 0);
+      tempBuffer.set(array, buffer.length);
+      buffer = tempBuffer;
+
+      offset += event.data.byteLength;
+
+      bar.update(offset, {
+        speed:
+          Math.round(
+            offset / (new Date().getTime() / 1000 - timestamp) / 1024
+          ) + ' kB/s',
+      });
+
+      if (offset >= transferMessage.fileSize) {
+        onComplete();
+        channel.close();
+      }
     });
 
-    await connection.setRemoteDescription(rtcMessage.data);
+    channel.addEventListener('close', () => {
+      if (offset < transferMessage.fileSize) {
+        onFailure();
+      } else if (!complete) {
+        onComplete();
+      }
+    });
+  });
 
-    const answer = await connection.createAnswer();
-    await connection.setLocalDescription(answer);
+  connection.addEventListener('iceconnectionstatechange', () => {
+    if (
+      (connection.iceConnectionState === 'failed' ||
+        connection.iceConnectionState === 'disconnected') &&
+      !complete
+    ) {
+      onFailure();
+    }
+  });
 
-    const nextRtcMessage: RTCDescriptionMessageModel = {
-        type: MessageType.RTC_DESCRIPTION,
-        transferId: transferMessage.transferId,
-        targetId: transferMessage.clientId as string,
-        data: {
-            type: connection.localDescription?.type,
-            sdp: connection.localDescription?.sdp,
-        },
-    };
+  await connection.setRemoteDescription(rtcMessage.data);
 
-    socket.send(nextRtcMessage);
+  const answer = await connection.createAnswer();
+  await connection.setLocalDescription(answer);
+
+  const nextRtcMessage: RTCDescriptionMessageModel = {
+    type: MessageType.RTC_DESCRIPTION,
+    transferId: transferMessage.transferId,
+    targetId: transferMessage.clientId as string,
+    data: {
+      type: connection.localDescription?.type,
+      sdp: connection.localDescription?.sdp,
+    },
+  };
+
+  socket.send(nextRtcMessage);
 }
