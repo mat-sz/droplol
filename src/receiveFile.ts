@@ -3,6 +3,7 @@ import colors from 'colors';
 import { TypeSocket } from 'typesocket';
 import { writeFileSync } from 'fs';
 import { basename } from 'path';
+import filesize from 'filesize';
 
 import {
   MessageModel,
@@ -35,8 +36,8 @@ export async function receiveFile(
       ' (' +
       transferMessage.fileType +
       ', ' +
-      Math.round(transferMessage.fileSize / 1024) +
-      ' kB'
+      filesize(transferMessage.fileSize) +
+      ')'
   );
 
   const connection = new RTCPeerConnection(rtcConfiguration);
