@@ -29,11 +29,13 @@ const DROP_WS_SERVER = process.env.DROP_WS_SERVER || 'wss://drop.lol/ws/';
 const DROP_ADDRESS = process.env.DROP_ADDRESS || 'https://drop.lol/';
 
 console.log(
-  colors.magenta(
-    colors.bold('drop.lol CLI | GH: https://github.com/mat-sz/droplol')
+  colors.yellow(
+    colors.bold('drop.lol CLI - GitHub: https://github.com/mat-sz/droplol')
   )
 );
-console.log(colors.bold('By using droplol you agree to the Terms of Service:'));
+console.log(
+  colors.bold('By using droplol you agree to the following Terms of Service:')
+);
 console.log(colors.bold(DROP_ADDRESS + 'tos'));
 console.log('');
 
