@@ -123,6 +123,16 @@ socket.on('message', async msg => {
         networkName: networkName,
       } as NameMessageModel);
 
+      if (welcomeMessage.noticeText) {
+        console.log('');
+        console.log(colors.bold('Server notice: ' + welcomeMessage.noticeText));
+      }
+
+      if (welcomeMessage.noticeUrl) {
+        console.log(colors.bold('Read more: ' + welcomeMessage.noticeUrl));
+        console.log('');
+      }
+
       if (receiveMode) {
         console.log('Send files via: ' + DROP_ADDRESS + networkName);
         console.log('or use the following network name: ' + networkName);
