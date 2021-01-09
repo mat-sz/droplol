@@ -108,6 +108,7 @@ socket.on('message', async msg => {
       clientId = welcomeMessage.clientId;
       rtcConfiguration = welcomeMessage.rtcConfiguration || {};
       networkName =
+        options.name ||
         welcomeMessage.suggestedName ||
         new Array(5)
           .fill('')
@@ -130,8 +131,9 @@ socket.on('message', async msg => {
 
       if (welcomeMessage.noticeUrl) {
         console.log(colors.bold('Read more: ' + welcomeMessage.noticeUrl));
-        console.log('');
       }
+
+      console.log('');
 
       if (receiveMode) {
         console.log('Send files via: ' + DROP_ADDRESS + networkName);
