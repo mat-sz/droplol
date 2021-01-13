@@ -109,6 +109,13 @@ export interface TransferUpdateModel {
   state?: TransferState;
 }
 
+export interface ChatMessageModel extends MessageModel {
+  type: MessageType.CHAT;
+  clientId?: string;
+  targetId: string;
+  message: string;
+}
+
 export type Message =
   | WelcomeMessageModel
   | NameMessageModel
@@ -118,7 +125,8 @@ export type Message =
   | PingMessageModel
   | RTCDescriptionMessageModel
   | RTCCandidateMessageModel
-  | EncryptedMessageModel;
+  | EncryptedMessageModel
+  | ChatMessageModel;
 
 export interface ClientModel {
   clientId: string;

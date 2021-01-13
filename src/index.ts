@@ -249,6 +249,9 @@ async function App() {
           timestamp: new Date().getTime(),
         } as PingMessageModel);
         break;
+      case MessageType.CHAT:
+        console.log('[Chat] ' + msg.message);
+        break;
     }
   }
 
