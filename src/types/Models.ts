@@ -23,6 +23,7 @@ export interface WelcomeMessageModel extends MessageModel {
 export interface NameMessageModel extends MessageModel {
   type: MessageType.NAME;
   networkName: string;
+  publicKey?: string;
 }
 
 export interface TransferMessageModel extends MessageModel {

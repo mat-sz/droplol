@@ -8,6 +8,10 @@ import * as wrtc from 'wrtc';
 import WebSocket from 'ws';
 import colors from 'colors';
 import commandLineArgs from 'command-line-args';
+import { RSA } from 'matcrypt';
+import { Crypto } from 'node-webcrypto-ossl';
+
+global['crypto'] = new Crypto();
 
 import {
   NameMessageModel,
@@ -21,6 +25,8 @@ import { sendFile } from './sendFile';
 import { receiveFile } from './receiveFile';
 
 async function App() {
+  const keyPair = await RSA.randomKeyPair();
+
   const nameCharacterSet = 'CEFGHJKMNPQRTVWXY';
   const DROP_WS_SERVER = process.env.DROP_WS_SERVER || 'wss://drop.lol/ws/';
   const DROP_ADDRESS = process.env.DROP_ADDRESS || 'https://drop.lol/';
@@ -114,6 +120,7 @@ async function App() {
         socket.send({
           type: 'name',
           networkName: networkName,
+          publicKey: keyPair.publicKey,
         } as NameMessageModel);
 
         if (msg.noticeText) {
@@ -249,8 +256,24 @@ async function App() {
     console.log('Connected to server: ' + DROP_WS_SERVER);
   });
 
-  socket.on('message', msg => {
-    handleMessage(msg);
+  socket.on('message', async msg => {
+    if (msg.type === MessageType.ENCRYPTED) {
+      const data = await RSA.decryptString(keyPair.privateKey, msg.payload);
+
+      if (data) {
+        const json = JSON.parse(data);
+
+        if (json && json.type) {
+          if (msg.clientId) {
+            json.clientId = msg.clientId;
+          }
+
+          handleMessage(json);
+        }
+      }
+    } else {
+      handleMessage(msg);
+    }
   });
 
   socket.connect();
