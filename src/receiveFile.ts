@@ -6,16 +6,16 @@ import { basename } from 'path';
 import filesize from 'filesize';
 
 import {
-  MessageModel,
   RTCDescriptionMessageModel,
   RTCCandidateMessageModel,
   TransferMessageModel,
+  Message,
 } from './types/Models';
 import { MessageType } from './types/MessageType';
 
 export async function receiveFile(
   transferMessage: TransferMessageModel,
-  socket: TypeSocket<MessageModel>,
+  socket: TypeSocket<Message>,
   rtcConfiguration: RTCConfiguration,
   connections: { [k: string]: RTCPeerConnection },
   rtcMessage: RTCDescriptionMessageModel

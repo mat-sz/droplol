@@ -3,10 +3,10 @@ import colors from 'colors';
 import { TypeSocket } from 'typesocket';
 
 import {
-  MessageModel,
   RTCDescriptionMessageModel,
   RTCCandidateMessageModel,
   ActionMessageModel,
+  Message,
 } from './types/Models';
 import { MessageType } from './types/MessageType';
 
@@ -14,7 +14,7 @@ export async function sendFile(
   transferId: string,
   clientId: string,
   fileBuffer: ArrayBuffer,
-  socket: TypeSocket<MessageModel>,
+  socket: TypeSocket<Message>,
   rtcConfiguration: RTCConfiguration,
   connections: { [k: string]: RTCPeerConnection },
   cancellationMessages: ActionMessageModel[]

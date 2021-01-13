@@ -69,6 +69,13 @@ export interface RTCCandidateMessageModel extends MessageModel {
   clientId?: string;
 }
 
+export interface EncryptedMessageModel extends MessageModel {
+  type: MessageType.ENCRYPTED;
+  targetId: string;
+  payload: string;
+  clientId?: string;
+}
+
 export interface TransferModel {
   transferId: string;
   fileName: string;
@@ -101,7 +108,19 @@ export interface TransferUpdateModel {
   state?: TransferState;
 }
 
+export type Message =
+  | WelcomeMessageModel
+  | NameMessageModel
+  | TransferMessageModel
+  | ActionMessageModel
+  | NetworkMessageModel
+  | PingMessageModel
+  | RTCDescriptionMessageModel
+  | RTCCandidateMessageModel
+  | EncryptedMessageModel;
+
 export interface ClientModel {
   clientId: string;
   clientColor: string;
+  publicKey?: string;
 }
