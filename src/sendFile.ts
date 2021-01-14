@@ -22,7 +22,8 @@ export async function sendFile(
   const bar = new cliProgress.SingleBar(
     {
       format:
-        '[Transfer] Progress: |' +
+        colors.bold('[Transfer] ') +
+        'Progress: |' +
         colors.cyan('{bar}') +
         '| {percentage}% || Speed: {speed}',
     },
@@ -77,7 +78,7 @@ export async function sendFile(
   const onFailure = () => {
     bar.stop();
     complete = true;
-    console.log('[Transfer] Transfer failure.');
+    console.log(colors.bold('[Transfer] ') + 'Transfer failure.');
     process.exit(0);
   };
 
@@ -86,7 +87,7 @@ export async function sendFile(
     bufferSupported && connection.sctp ? connection.sctp.maxMessageSize : 16384;
 
   channel.addEventListener('open', () => {
-    console.log('[Transfer] Connected, sending file.');
+    console.log(colors.bold('[Transfer] ') + 'Connected, sending file.');
     bar.start(fileBuffer.byteLength, 0, {
       speed: 'N/A',
     });
@@ -114,7 +115,7 @@ export async function sendFile(
 
       if (offset >= fileBuffer.byteLength) {
         bar.stop();
-        console.log('[Transfer] File transfer complete.');
+        console.log(colors.bold('[Transfer] ') + 'File transfer complete.');
         setTimeout(() => {
           process.exit(0);
         }, 5000);

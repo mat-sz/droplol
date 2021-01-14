@@ -23,7 +23,8 @@ export async function receiveFile(
   const bar = new cliProgress.SingleBar(
     {
       format:
-        '[Transfer] Progress: |' +
+        colors.bold('[Transfer] ') +
+        'Progress: |' +
         colors.cyan('{bar}') +
         '| {percentage}% || Speed: {speed}',
     },
@@ -31,7 +32,8 @@ export async function receiveFile(
   );
 
   console.log(
-    '[Transfer] Incoming transfer: ' +
+    colors.bold('[Transfer] ') +
+      'Incoming transfer: ' +
       transferMessage.fileName +
       ' (' +
       transferMessage.fileType +
@@ -63,21 +65,21 @@ export async function receiveFile(
   let complete = false;
   const onFailure = () => {
     complete = true;
-    console.log('[Transfer] Transfer failed.');
+    console.log(colors.bold('[Transfer] ') + 'Transfer failed.');
   };
 
   const onComplete = () => {
     complete = true;
 
     bar.stop();
-    console.log('[Transfer] Complete.');
+    console.log(colors.bold('[Transfer] ') + 'Complete.');
     writeFileSync(basename(transferMessage.fileName), buffer);
 
     connection.close();
   };
 
   connection.addEventListener('datachannel', event => {
-    console.log('[Transfer] Connected.');
+    console.log(colors.bold('[Transfer] ') + 'Connected.');
     bar.start(transferMessage.fileSize, 0, {
       speed: 'N/A',
     });

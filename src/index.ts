@@ -37,9 +37,11 @@ async function App() {
     )
   );
   console.log(
-    colors.bold('By using droplol you agree to the following Terms of Service:')
+    colors.bold(
+      'By using droplol you agree to the following Terms of Service: ' +
+        colors.bold(DROP_ADDRESS + 'tos')
+    )
   );
-  console.log(colors.bold(DROP_ADDRESS + 'tos'));
   console.log('');
 
   const optionDefinitions = [
@@ -125,23 +127,31 @@ async function App() {
 
         if (msg.noticeText) {
           console.log('');
-          console.log(colors.bold('Server notice: ' + msg.noticeText));
+          console.log(colors.bold('[Notice] ') + msg.noticeText);
         }
 
         if (msg.noticeUrl) {
-          console.log(colors.bold('Read more: ' + msg.noticeUrl));
+          console.log(colors.bold('[Notice] ') + 'Read more: ' + msg.noticeUrl);
         }
 
         console.log('');
 
         if (receiveMode) {
-          console.log('Send files via: ' + DROP_ADDRESS + networkName);
-          console.log('or use the following network name: ' + networkName);
+          console.log(
+            colors.bold('[Network] ') +
+              'Send files via: ' +
+              DROP_ADDRESS +
+              networkName
+          );
         }
         break;
       case MessageType.NETWORK:
+        console.log(
+          colors.bold('[Network] ') +
+            'Connected clients: ' +
+            (msg.clients.length - 1)
+        );
         if (msg.clients.length > 1 && fileName && fileBuffer) {
-          console.log('Connected clients: ' + (msg.clients.length - 1));
           const clients = msg.clients.filter(
             client => client.clientId !== clientId
           );
@@ -172,10 +182,6 @@ async function App() {
               });
             });
           }
-        } else if (msg.clients.length <= 1) {
-          console.log(
-            'No clients available, open: ' + DROP_ADDRESS + networkName
-          );
         }
         break;
       case MessageType.TRANSFER:
@@ -250,14 +256,10 @@ async function App() {
         } as PingMessageModel);
         break;
       case MessageType.CHAT:
-        console.log('[Chat] ' + msg.message);
+        console.log(colors.bold('[Chat] ') + msg.message);
         break;
     }
   }
-
-  socket.on('connected', () => {
-    console.log('Connected to server: ' + DROP_WS_SERVER);
-  });
 
   socket.on('message', async msg => {
     if (msg.type === MessageType.ENCRYPTED) {
