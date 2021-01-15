@@ -215,7 +215,7 @@ async function App() {
                 msg.transferId,
                 msg.clientId as string,
                 fileBuffer,
-                socket,
+                socket.send,
                 rtcConfiguration,
                 connections,
                 cancellationMessages
@@ -235,7 +235,7 @@ async function App() {
         } else if (msg.transferId in transferMessages) {
           receiveFile(
             transferMessages[msg.transferId],
-            socket,
+            socket.send,
             rtcConfiguration,
             connections,
             msg

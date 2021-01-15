@@ -14,7 +14,7 @@ export async function sendFile(
   transferId: string,
   clientId: string,
   fileBuffer: ArrayBuffer,
-  socket: TypeSocket<Message>,
+  send: (message: Message) => void,
   rtcConfiguration: RTCConfiguration,
   connections: { [k: string]: RTCPeerConnection },
   cancellationMessages: ActionMessageModel[]
@@ -35,7 +35,7 @@ export async function sendFile(
 
   for (let message of cancellationMessages) {
     if (message.transferId !== transferId) {
-      socket.send(message);
+      send(message);
     }
   }
 
@@ -53,7 +53,7 @@ export async function sendFile(
       },
     };
 
-    socket.send(nextRtcMessage);
+    send(nextRtcMessage);
   });
 
   connection.addEventListener('icecandidate', e => {
@@ -66,7 +66,7 @@ export async function sendFile(
       data: e.candidate,
     };
 
-    socket.send(candidateMessage);
+    send(candidateMessage);
   });
 
   const channel = connection.createDataChannel('sendDataChannel');

@@ -15,7 +15,7 @@ import { MessageType } from './types/MessageType';
 
 export async function receiveFile(
   transferMessage: TransferMessageModel,
-  socket: TypeSocket<Message>,
+  send: (message: Message) => void,
   rtcConfiguration: RTCConfiguration,
   connections: { [k: string]: RTCPeerConnection },
   rtcMessage: RTCDescriptionMessageModel
@@ -55,7 +55,7 @@ export async function receiveFile(
       data: e.candidate,
     };
 
-    socket.send(candidateMessage);
+    send(candidateMessage);
   });
 
   const timestamp = new Date().getTime() / 1000;
@@ -143,5 +143,5 @@ export async function receiveFile(
     },
   };
 
-  socket.send(nextRtcMessage);
+  send(nextRtcMessage);
 }
