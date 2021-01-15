@@ -102,6 +102,8 @@ async function App() {
     retryOnClose: false,
   });
 
+  const send = socket.send;
+
   async function handleMessage(msg: Message) {
     switch (msg.type) {
       case MessageType.WELCOME:
@@ -119,7 +121,7 @@ async function App() {
             )
             .join('');
 
-        socket.send({
+        send({
           type: 'name',
           networkName: networkName,
           publicKey: keyPair.publicKey,
@@ -163,7 +165,7 @@ async function App() {
               const transferId = uuid();
               validTransferIds.push(transferId);
 
-              socket.send({
+              send({
                 type: 'transfer',
                 transferId: transferId,
                 targetId: client.clientId,
@@ -189,7 +191,7 @@ async function App() {
           console.log(
             'Transfer request received but application is running in send mode.'
           );
-          socket.send({
+          send({
             type: MessageType.ACTION,
             targetId: msg.clientId as string,
             transferId: msg.transferId,
@@ -199,7 +201,7 @@ async function App() {
         }
 
         transferMessages[msg.transferId] = msg;
-        socket.send({
+        send({
           type: MessageType.ACTION,
           targetId: msg.clientId as string,
           transferId: msg.transferId,
@@ -215,7 +217,7 @@ async function App() {
                 msg.transferId,
                 msg.clientId as string,
                 fileBuffer,
-                socket.send,
+                send,
                 rtcConfiguration,
                 connections,
                 cancellationMessages
@@ -235,7 +237,7 @@ async function App() {
         } else if (msg.transferId in transferMessages) {
           receiveFile(
             transferMessages[msg.transferId],
-            socket.send,
+            send,
             rtcConfiguration,
             connections,
             msg
@@ -250,7 +252,7 @@ async function App() {
         } catch {}
         break;
       case MessageType.PING:
-        socket.send({
+        send({
           type: MessageType.PING,
           timestamp: new Date().getTime(),
         } as PingMessageModel);
