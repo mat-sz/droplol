@@ -19,6 +19,8 @@ import {
   TransferMessageModel,
   ActionMessageModel,
   Message,
+  ClientModel,
+  EncryptedMessageModel,
 } from './types/Models';
 import { MessageType, ActionMessageActionType } from './types/MessageType';
 import { sendFile } from './sendFile';
@@ -102,7 +104,33 @@ async function App() {
     retryOnClose: false,
   });
 
-  const send = socket.send;
+  let clients: ClientModel[] = [];
+
+  const send = async (msg: Message) => {
+    if ('targetId' in msg) {
+      const target = clients.find(client => client.clientId === msg.targetId);
+
+      if (target && target.publicKey) {
+        try {
+          const payload: string = await RSA.encryptString(
+            target.publicKey,
+            JSON.stringify(msg)
+          );
+
+          const message: EncryptedMessageModel = {
+            type: MessageType.ENCRYPTED,
+            targetId: msg.targetId,
+            payload,
+          };
+
+          socket.send(message);
+          return;
+        } catch {}
+      }
+    }
+
+    socket.send(msg);
+  };
 
   async function handleMessage(msg: Message) {
     switch (msg.type) {
@@ -153,10 +181,9 @@ async function App() {
             'Connected clients: ' +
             (msg.clients.length - 1)
         );
+        clients = msg.clients.filter(client => client.clientId !== clientId);
+
         if (msg.clients.length > 1 && fileName && fileBuffer) {
-          const clients = msg.clients.filter(
-            client => client.clientId !== clientId
-          );
           if (!transferInProgress) {
             clients.forEach(async client => {
               if (clientsContacted.includes(client.clientId)) return;
