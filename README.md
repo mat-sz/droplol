@@ -1,5 +1,9 @@
 # droplol
 
+> **[wrtc](https://github.com/node-webrtc/node-webrtc) takes a while to get updated to the latest node.js version.**
+>
+> **Usage of LTS versions of node.js is recommended with this package.**
+
 [drop.lol](https://drop.lol) CLI client.
 
 <p align="center">
