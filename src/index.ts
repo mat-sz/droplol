@@ -14,7 +14,7 @@ import { Crypto } from 'node-webcrypto-ossl';
 global['crypto'] = new Crypto();
 
 import {
-  NameMessageModel,
+  NetworkNameMessageModel,
   PingMessageModel,
   TransferMessageModel,
   ActionMessageModel,
@@ -139,7 +139,7 @@ async function App() {
         rtcConfiguration = msg.rtcConfiguration || {};
         networkName =
           options.name ||
-          msg.suggestedName ||
+          msg.suggestedNetworkName ||
           new Array(5)
             .fill('')
             .map(() =>
@@ -150,10 +150,10 @@ async function App() {
             .join('');
 
         send({
-          type: 'name',
+          type: MessageType.NETWORK_NAME,
           networkName: networkName,
           publicKey: keyPair.publicKey,
-        } as NameMessageModel);
+        } as NetworkNameMessageModel);
 
         if (msg.noticeText) {
           console.log('');
@@ -193,7 +193,7 @@ async function App() {
               validTransferIds.push(transferId);
 
               send({
-                type: 'transfer',
+                type: MessageType.TRANSFER,
                 transferId: transferId,
                 targetId: client.clientId,
                 fileName: fileName,

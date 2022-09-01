@@ -14,16 +14,28 @@ export interface WelcomeMessageModel extends MessageModel {
   type: MessageType.WELCOME;
   clientId: string;
   clientColor: string;
-  suggestedName: string;
+  suggestedClientName?: string;
+  suggestedNetworkName?: string;
+  localNetworkNames: string[];
   rtcConfiguration?: RTCConfiguration;
   noticeText?: string;
   noticeUrl?: string;
 }
 
-export interface NameMessageModel extends MessageModel {
-  type: MessageType.NAME;
+export interface LocalNetworksMessageModel extends MessageModel {
+  type: MessageType.LOCAL_NETWORKS;
+  localNetworkNames: string[];
+}
+
+export interface NetworkNameMessageModel extends MessageModel {
+  type: MessageType.NETWORK_NAME;
   networkName: string;
   publicKey?: string;
+}
+
+export interface ClientNameMessageModel extends MessageModel {
+  type: MessageType.CLIENT_NAME;
+  clientName: string;
 }
 
 export interface TransferMessageModel extends MessageModel {
@@ -118,7 +130,9 @@ export interface ChatMessageModel extends MessageModel {
 
 export type Message =
   | WelcomeMessageModel
-  | NameMessageModel
+  | LocalNetworksMessageModel
+  | NetworkNameMessageModel
+  | ClientNameMessageModel
   | TransferMessageModel
   | ActionMessageModel
   | NetworkMessageModel
