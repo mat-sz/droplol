@@ -13,7 +13,6 @@ export interface MessageModel {
 export interface WelcomeMessageModel extends MessageModel {
   type: MessageType.WELCOME;
   clientId: string;
-  clientColor: string;
   suggestedClientName?: string;
   suggestedNetworkName?: string;
   localNetworkNames: string[];
@@ -144,6 +143,6 @@ export type Message =
 
 export interface ClientModel {
   clientId: string;
-  clientColor: string;
+  clientName?: string;
   publicKey?: string;
 }
