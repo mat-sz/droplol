@@ -1,3 +1,7 @@
+> [!WARNING]  
+> This project is no longer maintained due to its main dependency (wrtc) not being updated for newer node.js versions.
+> Please use the Web UI instead - https://drop.lol
+
 # droplol
 
 > **[wrtc](https://github.com/node-webrtc/node-webrtc) takes a while to get updated to the latest node.js version.**
